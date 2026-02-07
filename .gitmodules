@@ -1,3 +1,4 @@
-[submodule "BSEP-EReg-1"]
+
+[submodule "E_Reg/BSEP-EReg-1"]
 	path = E_Reg/BSEP-EReg-1
 	url = https://github.com/HyPower-Bristol/BSEP-EReg-1.git
