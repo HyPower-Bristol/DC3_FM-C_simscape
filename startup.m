@@ -18,3 +18,4 @@ fprintf('Project Root set to: %s\n', pwd);
 
 
 %% Load Relevant Files
+Fluid_Properties
