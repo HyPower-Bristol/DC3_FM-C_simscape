@@ -3,6 +3,12 @@
 %   
 %   This script runs all files necessary to setup the model when opened. 
 
+
+%% Tidy Up Workspace
+clear all
+clc
+
+
 %% Loading File Structure
 disp("Loading DC3 FMC Model")
 [currentPath, ~, ~] = fileparts(mfilename('fullpath'));
@@ -11,12 +17,4 @@ addpath(genpath(currentPath));
 fprintf('Project Root set to: %s\n', pwd);
 
 
-clear all
-clc
-
-%----------------- Add model paths --------------------
-addpath(genpath("Components\"))
-addpath(genpath("E_Reg\"))
-addpath(genpath("Logic\"))
-addpath(genpath("Output\"))
-addpath(genpath("Scripts\"))
+%% Load Relevant Files
