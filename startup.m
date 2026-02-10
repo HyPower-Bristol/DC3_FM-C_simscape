@@ -11,3 +11,12 @@ addpath(genpath(currentPath));
 fprintf('Project Root set to: %s\n', pwd);
 
 
+clear all
+clc
+
+%----------------- Add model paths --------------------
+addpath(genpath("Components\"))
+addpath(genpath("E_Reg\"))
+addpath(genpath("Logic\"))
+addpath(genpath("Output\"))
+addpath(genpath("Scripts\"))
