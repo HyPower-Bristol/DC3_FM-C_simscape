@@ -10,5 +10,5 @@ load("EthanolTable.mat");
 load("N2GasTables.mat");
 load("N2OTables.mat");
 
-%%
+%% AMBIENT CONDITIONS
 ATMOSPHERIC_PRESS_Pa = 101325;                                             % Atmospheric Pressure, Pascals

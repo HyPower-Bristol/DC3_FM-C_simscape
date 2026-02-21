@@ -11,9 +11,9 @@ clc
 
 %% Loading File Structure
 disp("Loading DC3 FMC Model")
-[currentPath, ~, ~] = fileparts(mfilename('fullpath'));
-cd(currentPath);
-addpath(genpath(currentPath));
+[CurrentPath, ~, ~] = fileparts(mfilename('fullpath'));
+cd(CurrentPath);
+addpath(genpath(CurrentPath));
 fprintf('Project Root set to: %s\n', pwd);
 
 
