@@ -6,8 +6,7 @@
 
 %% SHARED PARAMETERS
 QD_Diameter_m = 0.004;                     % From DC2 Model
-QD_OrificeArea_m2 = QD_Diameter_m^2/4*pi;  % Mathematical Relation
-QD_LeakageRatio = 1e-12;                   % From DC2 Model
+QD_OrificeArea_m2 = QD_Diameter_m^2/4*pi;  
 
 
 %% GS FUEL SUBSYSTEM
