@@ -5,9 +5,17 @@
 
 
 %% SHARED PARAMETERS
+% QD Parameters
 QD_Diameter_m = 0.004;                     % From DC2 Model
-QD_OrificeArea_m2 = QD_Diameter_m^2/4*pi;  
+QD_OrificeArea_m2 = QD_Diameter_m^2/4*pi;  % Mathematical Relation
+QD_LeakageRatio = 1e-12;                   % From DC2 Model
 
+% Hose Parameters
+
+GS_hose_length = 5;  % [m]
+GS_hose_thickness = 4/1000; %[m]
+GS_hose_mass_per_length = N2_pipe_diameter*pi*GS_hose_thickness*Ally_density; %[kg/m]
+GS_hose_surface_area_per_length = N2_pipe_diameter*pi; %[kg/m]
 
 %% GS FUEL SUBSYSTEM
 

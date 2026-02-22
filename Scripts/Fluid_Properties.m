@@ -11,4 +11,5 @@ load("N2GasTables.mat");
 load("N2OTables.mat");
 
 %% AMBIENT CONDITIONS
-ATMOSPHERIC_PRESS_Pa = 101325;                                             % Atmospheric Pressure, Pascals
+AtmosphericPressure_Pa = 101325;    % ISA Sea Level Pressure, Pascals
+AmbientTemp_K = 288.15;             % ISA Sea Level Temp, Kelvin
