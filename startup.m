@@ -3,20 +3,21 @@
 %   
 %   This script runs all files necessary to setup the model when opened. 
 
-%% Loading File Structure
-disp("Loading DC3 FMC Model")
-[currentPath, ~, ~] = fileparts(mfilename('fullpath'));
-cd(currentPath);
-addpath(genpath(currentPath));
-fprintf('Project Root set to: %s\n', pwd);
 
-
+%% Tidy Up Workspace
 clear all
 clc
 
-%----------------- Add model paths --------------------
-addpath(genpath("Components\"))
-addpath(genpath("E_Reg\"))
-addpath(genpath("Logic\"))
-addpath(genpath("Output\"))
-addpath(genpath("Scripts\"))
+
+%% Loading File Structure
+disp("Loading DC3 FMC Model")
+[CurrentPath, ~, ~] = fileparts(mfilename('fullpath'));
+cd(CurrentPath);
+addpath(genpath(CurrentPath));
+fprintf('Project Root set to: %s\n', pwd);
+
+
+%% Load Relevant Files
+Fluid_Properties                  % Load Fluids LUTs
+Thermofluids_Parameters_GS        % Load GS Simscape Block Parameters
+Thermofluids_Parameters_LV        % Load LV Simscape Block Parameters
