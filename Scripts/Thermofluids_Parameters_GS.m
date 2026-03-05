@@ -21,6 +21,7 @@ GS_Hose_SurfaceAreaPerLength = Pressurant_pipe_diameter_m*pi;                   
 
 %% GS FUEL SUBSYSTEM
 GS_Initial_Fuel_Temp_K = 300;
+GS_Initial_Fuel_Pressure_bar = 50;
 
 
 
@@ -28,6 +29,7 @@ GS_Initial_Fuel_Temp_K = 300;
 
 %% GS OXIDISER SUBSYSTEM
 GS_Initial_Ox_Temp_K = 300;
+GS_Initial_Ox_Pressure_bar = 50;
 
 
 
