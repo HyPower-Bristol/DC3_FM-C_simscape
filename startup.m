@@ -19,6 +19,6 @@ fprintf('Project Root set to: %s\n', pwd);
 
 %% Load Relevant Files
 Fluid_Properties                  % Load Fluids LUTs
-Ally_Properties                   % Load aluminium material proprties
 Thermofluids_Parameters_GS        % Load GS Simscape Block Parameters
 Thermofluids_Parameters_LV        % Load LV Simscape Block Parameters
+
