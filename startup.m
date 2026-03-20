@@ -18,8 +18,12 @@ fprintf('Project Root set to: %s\n', pwd);
 
 
 %% Load Relevant Files
-Fluid_Properties                  % Load Fluids LUTs
-Ally_properties                   % Load aluminium alloy properties
-Thermofluids_Parameters_GS        % Load GS Simscape Block Parameters
-Thermofluids_Parameters_LV        % Load LV Simscape Block Parameters
+Fluid_Properties                    % Load Fluids LUTs
+Ally_properties                     % Load aluminium alloy properties
+Thermofluids_Parameters_GS          % Load GS Simscape Block Parameters
+Thermofluids_Parameters_LV_Tank     % Load LV Tank Simscape Block Parameters
+Thermofluids_Parameters_LV_Init     % Load LV Pipe Simscape Block Parameters
 
+
+%% Simulation Settings
+Tstop = 20;

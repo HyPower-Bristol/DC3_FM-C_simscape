@@ -1,8 +1,9 @@
 %%  Thermofluids_Parameters_LV.m
 %   Adam Driver 06/02/26
 %   Natnael Amanuel 19/02/26 -> Now
+%   Man Wui Fung 20/03/2026 - renamed from thermofluids_paramreters_LV
 %   
-%   This script holds all model parameters for the LV Simscape model. This
+%   This script holds all model parameters for the LV Simscape model for tank. This
 %   is implemented separately to GS to enable easier integration with the
 %   MBSE model. 
 
