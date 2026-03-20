@@ -1,0 +1,189 @@
+component injector_plate
+    % N2O Injector plate
+    % This is the injector plate component for 2-phase flow
+    % what am I doing
+    % Why am I writing simscape components
+    % Why can't I just use the orifice component in Simscape
+
+nodes
+    A = foundation.two_phase_fluid.two_phase_fluid; % A:left
+    B = foundation.two_phase_fluid.two_phase_fluid; % B:right
+end
+
+parameters
+    % delta_p_nominal  = {0.001, 'MPa'   }; % Nominal pressure drop
+    % mdot_nominal     = {0.1,   'kg/s'  }; % Nominal mass flow rate
+    % v_nominal        = {0,     'm^3/kg'}; % Nominal specific volume
+    % area             = {0.01,  'm^2'   }; % Cross-sectional area at ports A and B
+    % laminar_fraction = {1e-3,  '1'     }; % Fraction of nominal mass flow rate for laminar flow
+
+    c_d                = {0.64,   '1'    }; % Discharge coefficient
+    area               = {0.01,   'm^2'  }; % Orifice area
+end
+
+parameters (Access = private)
+        m = length(A.unorm_liq_TLU); % row index of saturated liquid in Temperature table
+        T_liq = A.T_TLU(m,:);
+        T_vap = A.T_TLU(m+1,:);
+end
+
+% parameters (Access = private)
+%     mdot_lam = laminar_fraction * mdot_nominal; % Mass flow rate threshold for laminar flow
+%     K1 = ...
+%         if v_nominal > 0, ...
+%             delta_p_nominal / v_nominal / mdot_nominal^2 ...
+%         else ...
+%             delta_p_nominal / {1, 'm^3/kg'} / mdot_nominal^2 ...
+%         end; % Pressure drop constant including density dependence
+%     K2 = delta_p_nominal / mdot_nominal^2; % Pressure drop constant excluding density dependence
+% end
+
+% Parameter checks
+equations
+%     assert(delta_p_nominal > 0)
+%     assert(mdot_nominal > 0)
+%     assert(area > 0)
+%     assert(laminar_fraction > 0)
+    assert(area > 0)
+    assert(c_d > 0)
+end
+
+variables (Access = protected)
+    mdot_A = {0, 'kg/s'}; % Mass flow rate into port A
+    mdot_B = {0, 'kg/s'}; % Mass flow rate into port B
+    Phi_A  = {0, 'kW'  }; % Energy flow rate into port A
+    Phi_B  = {0, 'kW'  }; % Energy flow rate into port B
+
+
+    mdot_SPI = {1, 'kg/s'};
+    mdot_HEM = {1, 'kg/s'};
+    kappa  = {0, '1'};
+    p_sat_vap_A   = {0.4,  'MPa'   }; % PV
+    p_sat_vap_B   = {0.4,  'MPa'   }; % PV
+    H_A = {1500, 'kJ/kg'};
+    H_B = {1400, 'kJ/kg'};
+
+end
+
+branches
+    mdot_A : A.mdot -> *;
+    mdot_B : B.mdot -> *;
+    Phi_A  : A.Phi  -> *;
+    Phi_B  : B.Phi  -> *;
+end
+
+intermediates (Access = private, ExternalAccess = none)
+    % Port pressure
+    p_A = A.p;
+    p_B = B.p;
+
+    % port specific enthalpy
+    u_A = A.u;
+    u_B = B.u;
+
+    % Normalized internal energy for inflow
+    unorm_A_in = foundation.two_phase_fluid.normalized_internal_energy(A.u, p_A, ...
+        A.u_min, A.u_max, A.p_TLU, A.u_sat_liq_TLU, A.u_sat_vap_TLU);
+    unorm_B_in = foundation.two_phase_fluid.normalized_internal_energy(B.u, p_B, ...
+        A.u_min, A.u_max, A.p_TLU, A.u_sat_liq_TLU, A.u_sat_vap_TLU);
+
+    % Specific volume for inflow
+    v_A_in = tablelookup(A.unorm_TLU, A.p_TLU, A.v_TLU, unorm_A_in, p_A, interpolation = linear, extrapolation = nearest);
+    v_B_in = tablelookup(A.unorm_TLU, A.p_TLU, A.v_TLU, unorm_B_in, p_B, interpolation = linear, extrapolation = nearest);
+    % v_avg = (v_A_in + v_B_in)/2;
+
+    % sat pressure
+    T_A = tablelookup(A.unorm_TLU, A.p_TLU, A.T_TLU, unorm_A_in, A.p, interpolation = linear, extrapolation = linear);
+    T_B = tablelookup(A.unorm_TLU, A.p_TLU, A.T_TLU, unorm_B_in, B.p, interpolation = linear, extrapolation = linear);
+
+end
+       
+
+equations
+    % Pressure drop relation
+    % if v_nominal > 0
+    %     p_A - p_B == K1 * mdot_A * mdot_v_abs;
+    % else
+    %     p_A - p_B == K2 * mdot_A * sqrt(mdot_A^2 + mdot_lam^2);
+    % end
+
+    p_sat_vap_A == tablelookup(T_vap, A.p_TLU, T_A, interpolation = linear, extrapolation = linear);
+    p_sat_vap_B == tablelookup(T_vap, A.p_TLU, T_B, interpolation = linear, extrapolation = linear);
+    H_A == A.u + p_A*v_A_in;
+    H_B == B.u + p_B*v_B_in;
+
+
+    if abs(p_A - p_B) > {5, 'bar'}
+        mdot_SPI == c_d * area * sqrt(2 * 1/v_A_in * abs(p_A - p_B));
+   
+        mdot_HEM == c_d * area * 1/v_B_in * sqrt(2 * abs(H_A - H_B));
+    
+        kappa == sqrt( abs((p_A - p_B) / (p_sat_vap_A - p_B)) );
+    
+        
+        mdot_A == (kappa/(1+kappa) * mdot_SPI + 1/(1+kappa) * mdot_HEM);
+
+    elseif abs(p_A - p_B) > {1, 'bar'}
+        mdot_SPI == c_d * area * sqrt(2 * 1/v_A_in * abs(p_A - p_B));
+    
+    
+        mdot_HEM == c_d * area * 1/v_B_in * sqrt(2 * abs(H_A - H_B));
+    
+        kappa == sqrt( abs((p_A - p_B) / (p_sat_vap_A - p_B)) );
+    
+        
+        mdot_A == simscape.function.blend(mdot_SPI, ...
+            (kappa/(1+kappa) * mdot_SPI + 1/(1+kappa) * mdot_HEM), ...
+            {1, 'bar'}, {5, 'bar'}, abs(p_A - p_B));
+
+    else
+        mdot_SPI == {0, 'kg/s'};
+        mdot_HEM == {0, 'kg/s'};
+        kappa  == {0, '1'};
+
+        p_A - p_B == 0.5 * v_A_in * (mdot_A/c_d/area)^2;
+    end
+
+    
+    % Mass balance
+    mdot_A + mdot_B == 0;
+
+    % Energy balance
+    Phi_A + Phi_B == 0;
+
+    % Run-time variable checks
+    % assert(p_sat_liq >= A.p_min, Action = pressure_check)
+    % assert(p_sat_vap >= A.p_min, Action = pressure_check)
+    % assert(p_sat_liq <= A.p_max, Action = pressure_check)
+    % assert(p_sat_vap <= A.p_max, Action = pressure_check)
+    assert(A.p >= A.p_min, message('physmod:simscape:library:two_phase_fluid:PressureMinValid', 'A'), Action = A.properties_range_check)
+    assert(A.p <= A.p_max, message('physmod:simscape:library:two_phase_fluid:PressureMaxValid', 'A'), Action = A.properties_range_check)
+    assert(A.u >= A.u_min, message('physmod:simscape:library:two_phase_fluid:InternalEnergyMinValid', 'A'), Action = A.properties_range_check)
+    assert(A.u <= A.u_max, message('physmod:simscape:library:two_phase_fluid:InternalEnergyMaxValid', 'A'), Action = A.properties_range_check)
+    assert(B.p >= B.p_min, message('physmod:simscape:library:two_phase_fluid:PressureMinValid', 'B'), Action = B.properties_range_check)
+    assert(B.p <= B.p_max, message('physmod:simscape:library:two_phase_fluid:PressureMaxValid', 'B'), Action = B.properties_range_check)
+    assert(B.u >= B.u_min, message('physmod:simscape:library:two_phase_fluid:InternalEnergyMinValid', 'B'), Action = B.properties_range_check)
+    assert(B.u <= B.u_max, message('physmod:simscape:library:two_phase_fluid:InternalEnergyMaxValid', 'B'), Action = B.properties_range_check)
+end
+
+% Internal components that calculate energy convection at ports A and B
+components (ExternalAccess = none)
+    convection_A = foundation.two_phase_fluid.port_convection(flow_area = area, length_scale = sqrt(4*area/pi));
+    convection_B = foundation.two_phase_fluid.port_convection(flow_area = area, length_scale = sqrt(4*area/pi));
+end
+connections
+    connect(A, convection_A.port)
+    connect(B, convection_B.port)
+end
+
+% Equate variables for internal components that calculate energy convection at ports A and B
+equations
+    convection_A.mdot == mdot_A;
+    convection_A.Phi  == Phi_A;
+    convection_B.mdot == mdot_B;
+    convection_B.Phi  == Phi_B;
+
+    convection_A.ht_I == convection_B.ht_I;
+end
+
+end
