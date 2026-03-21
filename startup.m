@@ -22,4 +22,5 @@ Fluid_Properties                  % Load Fluids LUTs
 Ally_properties                   % Load aluminium alloy properties
 Thermofluids_Parameters_GS        % Load GS Simscape Block Parameters
 Thermofluids_Parameters_LV        % Load LV Simscape Block Parameters
+Engine_Properties                 % Load Engine Simscape Block Parameters
 
