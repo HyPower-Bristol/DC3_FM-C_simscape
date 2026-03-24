@@ -7,4 +7,5 @@
 %% Constants
 Engine_NozzleExitArea_m2 = 0;  
 Engine_NozzleThroatArea_m2 = 0; 
+ExhaustGamma_JpKgK = 1.18;          % Gemini Assumed Value
 g0_mps2 = 9.80665;                  % Standard Value, for conversion of Isp
