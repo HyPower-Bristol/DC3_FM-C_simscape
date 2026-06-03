@@ -19,14 +19,14 @@
 % Nitrogen tank mass = 1.93 kg (ref 11.Appendices A.2 propulsion overview of DC3-PDR)
 % Nitrogen burst disc threshold 350 bar (ref 4.3 feed system)
 % Still needed length - not provided - making assumption for now**
-N2_TANK_pressure = 30000000;           % tank pressure, Pa
-N2_BURST_DISC_pressure = 35000000;     % burst disc pressure, Pa
+N2_TANK_pressure = 30000000;           % tank pressure, Pa (done)
+N2_BURST_DISC_pressure = 35000000;     % burst disc pressure, Pa (done) [*remember in simscape value/100000]
 N2_TANK_mass = 1.93;                   % tank mass, kg
 N2_TANK_cs_area = 0.029559;            % <-may not apply % tank cross sectional area, m^2 -> from diameter of 194mm
 N2_TANK_inlet_cs_area = NaN;           % inlet cross-sectional area, m^2
 N2_TANK_length = 0.3;                  % tank length, m
 N2_TANK_inlet_h = NaN;                 % inlet height, m
-N2_TANK_volume = 0.0088678;            % tank volume, m^3 <- derived value
+N2_TANK_volume = 0.0088678;            % tank volume, m^3 <- derived value (done)
 
 
 %% Oxidiser, Ox, (N20) Tank Parameters
@@ -38,16 +38,16 @@ N2_TANK_volume = 0.0088678;            % tank volume, m^3 <- derived value
 % Oxidiser burst disc threshold 65 bar (ref 4.3 feed system)
 % In the case where the nitrous pressure in the oxidiser tank exceeds 58 bar
 % Then close GS Ox fill(if still filling) and vent Ox tank (ref C.9.7 Nitrous Overpress p112 DC3-PDR)
-Ox_TANK_pressure = 5000000;         % Tank pressure, Pa
-OX_BURST_DISC_pressure = 6500000;   % Burst disc pressure, Pa
+Ox_TANK_pressure = 5000000;         % Tank pressure, Pa (done)
+OX_BURST_DISC_pressure = 6500000;   % Burst disc pressure, Pa (done) [*remember in simscape value/100000]
 OX_TANK_SAFETY_pressure = 5800000;  % **double check if modelling this -conditional pressure, Pa
 OX_TANK_mass = 6;                   % Tank mass, kg
 OX_volume = 14.4;                   % Oxidiser volume, l
-Ox_TANK_cs_area = 0.029559;         % Tank cross sectional area, m^2 -> from diameter of 194mm
+Ox_TANK_cs_area = 0.029559;         % Tank cross sectional area, m^2 -> from diameter of 194mm (done)
 Ox_TANK_inlet_cs_area = NaN;        % Inlet cross-sectional area, m^2
 OX_TANK_length = 0.525;             % Tank length, m
 OX_TANK_inlet_h = NaN;              % Inlet height, m
-OX_TANK_volume = 0.0155186;         % Tank volume, m^3 <-derived value
+OX_TANK_volume = 0.0155186;         % Tank volume, m^3 <-derived value (done)
 
 
 %% Fuel (IPA) Tank Parameters
