@@ -5,7 +5,10 @@
 
 
 %% Constants
-% Size
+% Injector 
+Inj_Cd_Fuel = 0.7;                  % Injector Fuel Discharge Coefficient, assumed
+Inj_A_Fuel_m2 = 0.0005;             % Injector Fuel Orifice Area, assumed
+% Engine Sizes
 Engine_NozzleExitArea_m2 = 0.006221;        % Engine3_BaseRPAFile.cfg
 Engine_NozzleThroatArea_m2 = 0.0018505;     % Engine3_BaseRPAFile.cfg
 Chamber_Volume_m3 = 0.00156;                % Engine3_BaseRPAFile.cfg  
