@@ -5,8 +5,13 @@
 
 
 %% Constants
-Engine_NozzleExitArea_m2 = 0.017;     % temp
-Engine_NozzleThroatArea_m2 = 0.0007;  % temporary guesstimate 
-Chamber_Volume_m3 = 0;               
+% Size
+Engine_NozzleExitArea_m2 = 0.006221;        % Engine3_BaseRPAFile.cfg
+Engine_NozzleThroatArea_m2 = 0.0018505;     % Engine3_BaseRPAFile.cfg
+Chamber_Volume_m3 = 0.00156;                % Engine3_BaseRPAFile.cfg  
+
+% Thermodynamics
 Exhaust_Gamma_JpKgK = 1.18;         % Gemini Assumed Value
+C_STAR_Ideal_mps = 1550;            % Placeholder until LUT made
+Nu_C_STAR_Ideal = 0.9;              % Placeholder Engine Efficiency
 g0_mps2 = 9.80665;                  % Standard Value, for conversion of Isp
