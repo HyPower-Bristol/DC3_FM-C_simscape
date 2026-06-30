@@ -61,7 +61,7 @@ function OX_MASS_FLOW_kgps = test_wrapper_NHNE(CHAMBER_PRESS_Pa, P_Sat, OX_ABS_T
     end
     rho_in   = 1 / v_in;
     
-    % FIXED: Removed multipliers. Internal energy is natively J/kg
+    % MULTIPLIERS REMOVED: Using raw table entries
     u_in     = interp1(unorm_col, u_col, unorm_in, 'linear');
     h_in     = u_in + (OX_ABS_PRESS_Pa * v_in); 
 
@@ -76,8 +76,9 @@ function OX_MASS_FLOW_kgps = test_wrapper_NHNE(CHAMBER_PRESS_Pa, P_Sat, OX_ABS_T
     s_vapor_sat  = N2OTables.vapour.s(1, :);    
     v_vapor_sat  = N2OTables.vapour.v(1, :);   
     
-    % FIXED: Removed multipliers. Saturation energies are natively J/kg
-    u_liquid_sat = N2OTables.liquid.u_sat; 
+    % FIX: Extract saturation boundaries directly from the main U matrix columns 
+    % to guarantee 100% unit alignment with u_in
+    u_liquid_sat = N2OTables.liquid.U(:, end).'; 
     u_vapor_sat  = N2OTables.vapour.U(:, 1).';  
 
     if mean(v_liquid_sat) > 100
@@ -85,66 +86,105 @@ function OX_MASS_FLOW_kgps = test_wrapper_NHNE(CHAMBER_PRESS_Pa, P_Sat, OX_ABS_T
         v_vapor_sat  = 1 ./ v_vapor_sat;
     end
 
-    max_flux    = 0;
-    P_lower_lim = min(P_grid_Pa); 
+    % Boundary set by Chamber Pressure
+    P_lower_lim = max(CHAMBER_PRESS_Pa, min(P_grid_Pa)); 
     P_upper_lim = min(P_Sat, max(P_grid_Pa));
     
-    best_ht    = 0;
-    best_rhot  = 0;
-    best_xt    = 0;
+    max_flux    = 0;
+    best_Pt     = 0;
+    best_ht     = 0;
+    best_rhot   = 0;
+    best_xt     = 0;
+    best_deltah = 0;
 
-    P_steps_Pa = linspace(P_lower_lim, P_upper_lim, 50);
-    for i = 1:50
-        P_guess_Pa = P_steps_Pa(i);
+    if P_lower_lim >= P_upper_lim
+        m_dot_HEM = m_dot_SPI;
+    else
+        % Scan down from high pressure (Psat) to low pressure (Pc)
+        P_steps_Pa = linspace(P_upper_lim, P_lower_lim, 50);
         
-        sl = interp1(P_grid_Pa, s_liquid_sat, P_guess_Pa, 'linear');
-        sv = interp1(P_grid_Pa, s_vapor_sat,  P_guess_Pa, 'linear');
-        vl = interp1(P_grid_Pa, v_liquid_sat, P_guess_Pa, 'linear');
-        vv = interp1(P_grid_Pa, v_vapor_sat,  P_guess_Pa, 'linear');
-        ul = interp1(P_grid_Pa, u_liquid_sat, P_guess_Pa, 'linear');
-        uv = interp1(P_grid_Pa, u_vapor_sat,  P_guess_Pa, 'linear');
-        
-        if sv > sl
-            x_t = (s_in - sl) / (sv - sl);
-            x_t = max(0, min(1, x_t)); 
-        else
-            x_t = 0;
+        for i = 1:50
+            P_guess_Pa = P_steps_Pa(i);
+            
+            sl = interp1(P_grid_Pa, s_liquid_sat, P_guess_Pa, 'linear');
+            sv = interp1(P_grid_Pa, s_vapor_sat,  P_guess_Pa, 'linear');
+            vl = interp1(P_grid_Pa, v_liquid_sat, P_guess_Pa, 'linear');
+            vv = interp1(P_grid_Pa, v_vapor_sat,  P_guess_Pa, 'linear');
+            ul = interp1(P_grid_Pa, u_liquid_sat, P_guess_Pa, 'linear');
+            uv = interp1(P_grid_Pa, u_vapor_sat,  P_guess_Pa, 'linear');
+            
+            if sv > sl
+                x_t = (s_in - sl) / (sv - sl);
+                x_t = max(0, min(1, x_t)); 
+            else
+                x_t = 0;
+            end
+            
+            v_t   = (1 - x_t)*vl + x_t*vv;
+            u_t   = (1 - x_t)*ul + x_t*uv;
+            rho_t = 1 / v_t;
+            h_t   = u_t + (P_guess_Pa * v_t); 
+            
+            delta_h = max(0, h_in - h_t);
+            current_flux = rho_t * sqrt(2 * delta_h);
+            
+            if current_flux > max_flux
+                max_flux     = current_flux;
+                best_Pt      = P_guess_Pa;
+                best_ht      = h_t;
+                best_rhot    = rho_t;
+                best_xt      = x_t;
+                best_deltah  = delta_h;
+            end
         end
-        
-        v_t   = (1 - x_t)*vl + x_t*vv;
-        u_t   = (1 - x_t)*ul + x_t*uv;
-        rho_t = 1 / v_t;
-        h_t   = u_t + (P_guess_Pa * v_t); 
-        
-        delta_h = max(0, h_in - h_t);
-        current_flux = rho_t * sqrt(2 * delta_h);
-        
-        if current_flux > max_flux
-            max_flux     = current_flux;
-            best_ht      = h_t;
-            best_rhot    = rho_t;
-            best_xt      = x_t;
-        end
-    end
-    
-    m_dot_HEM = Inj_Cd_Ox * Inj_A_Ox_m2 * max_flux;
-
-    if CHAMBER_PRESS_Pa == 1.5e6 
-        fprintf('\n--- HEM MAX FLUX DIAGNOSTICS ---\n');
-        fprintf('Max Flux Achieved: %f kg/m2/s\n', max_flux);
-        fprintf('Upstream h_in:     %f J/kg\n', h_in);
-        fprintf('Throat h_t:        %f J/kg\n', best_ht);   
-        fprintf('Throat delta_h:    %f J/kg\n', h_in - best_ht);
-        fprintf('Throat rho_t:      %f kg/m3\n', best_rhot); 
-        fprintf('Throat Quality x:  %f\n', best_xt);       
-        fprintf('--------------------------------\n');
+        m_dot_HEM = Inj_Cd_Ox * Inj_A_Ox_m2 * max_flux;
     end
 
     %% 4. NON-EQUILIBRIUM BLENDING & FINAL MASS FLOW
     if CHAMBER_PRESS_Pa >= P_Sat
+        kappa = 0;
         OX_MASS_FLOW_kgps = m_dot_SPI;
     else
         kappa = sqrt((OX_ABS_PRESS_Pa - P_Sat) / (P_Sat - CHAMBER_PRESS_Pa));
         OX_MASS_FLOW_kgps = (1 / (1 + kappa)) * m_dot_SPI + (kappa / (1 + kappa)) * m_dot_HEM;
+    end
+
+    %% 5. COMPREHENSIVE ADVANCED DIAGNOSTIC LOGGING ENGINE
+    if abs(CHAMBER_PRESS_Pa - 1.5e6) < 1e5 % Isolates print message to your 15 bar test step
+        fprintf('\n==================================================\n');
+        fprintf('       NHNE RUNTIME DIAGNOSTIC SNAPSHOT           \n');
+        fprintf('==================================================\n');
+        fprintf('--- OPERATING POINTS ---\n');
+        fprintf('  Inlet Pressure (Pa):       %.2f\n', OX_ABS_PRESS_Pa);
+        fprintf('  Saturation Pressure (Pa):  %.2f\n', P_Sat);
+        fprintf('  Chamber Pressure (Pa):     %.2f\n', CHAMBER_PRESS_Pa);
+        fprintf('  Inlet Temperature (K):     %.2f\n', OX_ABS_TEMP_K);
+        
+        fprintf('\n--- UPSTREAM STATE ---\n');
+        fprintf('  v_in (m3/kg):              %.8f\n', v_in);
+        fprintf('  rho_in (kg/m3):            %.2f\n', rho_in);
+        fprintf('  u_in (Table Scale):        %.2f\n', u_in);
+        fprintf('  P*v Work Term (Pa*v):      %.2f\n', OX_ABS_PRESS_Pa * v_in);
+        fprintf('  h_in Total (Computed):     %.2f\n', h_in);
+        fprintf('  s_in (J/kg*K):             %.2f\n', s_in);
+
+        fprintf('\n--- OPTIMIZATION SEARCH PROFILE ---\n');
+        fprintf('  Search Lower Limit (Pa):   %.2f\n', P_lower_lim);
+        fprintf('  Search Upper Limit (Pa):   %.2f\n', P_upper_lim);
+        fprintf('  Selected Throat Press (Pa):%.2f\n', best_Pt);
+
+        fprintf('\n--- CHOKED THROAT PROPERTIES (HEM Peak) ---\n');
+        fprintf('  Throat x Quality:          %.6f\n', best_xt);
+        fprintf('  Throat rho_t (kg/m3):      %.2f\n', best_rhot);
+        fprintf('  Throat h_t Total:          %.2f\n', best_ht);
+        fprintf('  Evaluated delta_h (J/kg):  %.2f\n', best_deltah);
+        fprintf('  Max Flux Achieved (kg/m2s):%.2f\n', max_flux);
+
+        fprintf('\n--- BLENDING & FINAL FLOWS ---\n');
+        fprintf('  m_dot_SPI Incompressible:  %.4f kg/s\n', m_dot_SPI);
+        fprintf('  m_dot_HEM Equilibrium:     %.4f kg/s\n', m_dot_HEM);
+        fprintf('  Dyer Weight Parameter (k): %.4f\n', kappa);
+        fprintf('  FINAL BLENDED FLOW RATE:   %.4f kg/s\n', OX_MASS_FLOW_kgps);
+        fprintf('==================================================\n\n');
     end
 end
