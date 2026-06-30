@@ -9,7 +9,7 @@
 Inj_Cd_Fuel = 0.62;                  % Injector Fuel Discharge Coefficient, assumed
 Inj_A_Fuel_m2 = 4.1e-5;              % Injector Fuel Orifice Area, assumed
 Inj_Cd_Ox = 0.62;                    % Injector Oxidiser Discharge Coefficient, assumed
-Inj_A_Ox_m2 = 1;                     % Injector Oxidiser Orifice Area, assumed
+Inj_A_Ox_m2 = 6.5e-5;                     % Injector Oxidiser Orifice Area, assumed
 
 % Engine Sizes
 Engine_NozzleExitArea_m2 = 0.006221;        % Engine3_BaseRPAFile.cfg
