@@ -5,7 +5,12 @@
 %   thermodynamic property look-up tables of chamber combustion, to be used
 %   in the engine model. 
 
+%
 % INLINE SCRIPT: process_cea_hardened.m
+% INLINE SCRIPT: process_cea_final_robust.m
+% INLINE SCRIPT: process_cea_final_robust.m
+% INLINE SCRIPT: process_cea_final_fixed.m
+% INLINE SCRIPT: process_cea_column_aligned.m
 clear; clc;
 
 txtFile = 'CEA_Hot.txt'; 
@@ -19,7 +24,9 @@ fid = fopen(txtFile, 'r');
 textContent = fread(fid, '*char').';
 fclose(fid);
 
+textContent = strrep(textContent, char(13), ''); 
 textContent = upper(textContent);
+
 pages = strsplit(textContent, 'THEORETICAL ROCKET PERFORMANCE');
 
 list_OF     = [];
@@ -32,54 +39,64 @@ list_IspOpt = [];
 for p = 1:length(pages)
     pageText = pages{p};
     
-    % Core validation: check for O/F profile
     ofTokens = regexp(pageText, 'O/F\s*=\s*([0-9\.]+)', 'tokens');
     if isempty(ofTokens); continue; end
     page_OF = str2double(ofTokens{1}{1});
     
-    % Clear local arrays for this page
-    p_vals = []; g_vals = []; c_vals = []; v_vals = []; i_vals = [];
-    
-    % Split into individual text lines
     lines = strsplit(pageText, '\n');
+    
+    idx_P = []; idx_Gamma = []; idx_Cstar = []; idx_Ivac = []; idx_Isp = [];
     
     for l = 1:length(lines)
         line = strtrim(lines{l});
         
-        % CRITICAL FILTER: Completely skip iteration trace lines
-        if startsWith(line, 'POINT ITN') || startsWith(line, 'Pinf/Pt'); continue; end
+        if startsWith(line, 'POINT ITN') || startsWith(line, 'PINF/PT'); continue; end
         
-        % Anchor each variable to its explicit row identifier
         if startsWith(line, 'P, BAR')
-            p_vals = str2num(regexprep(line, 'P, BAR', '')); %#ok<ST2NM>
-        elseif startsWith(line, 'GAMMAs')
-            g_vals = str2num(regexprep(line, 'GAMMAs', '')); %#ok<ST2NM>
+            numsStr = regexp(line, 'P,\s*BAR\s+([0-9\.\s\-]+)', 'tokens', 'once');
+            if ~isempty(numsStr); idx_P{end+1} = str2num(numsStr{1}); end
+        elseif startsWith(line, 'GAMMAS')
+            numsStr = regexp(line, 'GAMMAS\s+([0-9\.\s\-]+)', 'tokens', 'once');
+            if ~isempty(numsStr); idx_Gamma{end+1} = str2num(numsStr{1}); end
         elseif startsWith(line, 'CSTAR, M/SEC')
-            c_vals = str2num(regexprep(line, 'CSTAR, M/SEC', '')); %#ok<ST2NM>
-        elseif startsWith(line, 'Ivac, M/SEC')
-            v_vals = str2num(regexprep(line, 'Ivac, M/SEC', '')); %#ok<ST2NM>
-        elseif startsWith(line, 'Isp, M/SEC')
-            i_vals = str2num(regexprep(line, 'Isp, M/SEC', '')); %#ok<ST2NM>
+            numsStr = regexp(line, 'CSTAR,\s*M/SEC\s+([0-9\.\s\-]+)', 'tokens', 'once');
+            if ~isempty(numsStr); idx_Cstar{end+1} = str2num(numsStr{1}); end
+        elseif startsWith(line, 'IVAC, M/SEC')
+            numsStr = regexp(line, 'IVAC,\s*M/SEC\s+([0-9\.\s\-]+)', 'tokens', 'once');
+            if ~isempty(numsStr); idx_Ivac{end+1} = str2num(numsStr{1}); end
+        elseif startsWith(line, 'ISP, M/SEC')
+            numsStr = regexp(line, 'ISP,\s*M/SEC\s+([0-9\.\s\-]+)', 'tokens', 'once');
+            if ~isempty(numsStr); idx_Isp{end+1} = str2num(numsStr{1}); end
         end
     end
     
-    % Only synchronize columns if all variables were parsed for this block
-    if isempty(p_vals) || isempty(g_vals) || isempty(c_vals) || isempty(v_vals) || isempty(i_vals)
-        continue;
-    end
+    numSubBlocks = min([length(idx_P), length(idx_Gamma), length(idx_Cstar), length(idx_Ivac), length(idx_Isp)]);
     
-    nCols = min([length(p_vals), length(g_vals), length(c_vals), length(v_vals), length(i_vals)]);
-    for c = 1:nCols
-        list_OF(end+1)     = page_OF;         %#ok<AGROW>
-        list_P(end+1)      = p_vals(c);       %#ok<AGROW>
-        list_Gamma(end+1)  = g_vals(c);       %#ok<AGROW>
-        list_Cstar(end+1)  = c_vals(c);       %#ok<AGROW>
-        list_Ivac(end+1)   = v_vals(c);       %#ok<AGROW>
-        list_IspOpt(end+1) = i_vals(c);       %#ok<AGROW>
+    for b = 1:numSubBlocks
+        subP     = idx_P{b};
+        subGamma = idx_Gamma{b};
+        subCstar = idx_Cstar{b};
+        subIvac  = idx_Ivac{b};
+        subIsp   = idx_Isp{b};
+        
+        % --- EXPLICIT POSITION MATCHING ---
+        % SubP and SubGamma have 3 values: [Chamber, Throat, Exit]
+        % Performance parameters have 2 values: [Throat, Exit]
+        if length(subP) >= 1 && length(subGamma) >= 1 && length(subCstar) >= 1 && length(subIvac) >= 2 && length(subIsp) >= 2
+            list_OF(end+1)     = page_OF;         
+            list_P(end+1)      = subP(1);         % Chamber Stagnation Pressure
+            list_Gamma(end+1)  = subGamma(1);     % Chamber Gamma
+            list_Cstar(end+1)  = subCstar(1);     % C* (Throat value matches chamber property)
+            list_Ivac(end+1)   = subIvac(2);      % Nozzle Exit Vacuum Isp
+            list_IspOpt(end+1) = subIsp(2);       % Nozzle Exit Optimum Isp
+        end
     end
 end
 
-% Rebuild coordinates securely via column operations
+if isempty(list_OF)
+    error('Data arrays are empty. Verification failed.');
+end
+
 X_of = list_OF(:); Y_p = list_P(:);
 Z_cstar = list_Cstar(:); Z_gamma = list_Gamma(:); Z_vac = list_Ivac(:); Z_isp = list_IspOpt(:);
 
@@ -106,9 +123,19 @@ LUT_Matrix_Isp_mps   = F_Isp(Grid_OF, Grid_P);
 save(matFile, 'LUT_Breakpoints_OF', 'LUT_Breakpoints_P_bar', 'LUT_Breakpoints_P_Pa', ...
               'LUT_Matrix_Cstar_mps', 'LUT_Matrix_Gamma', 'LUT_Matrix_Ivac_mps', 'LUT_Matrix_Isp_mps');
           
-fprintf('Secure processing complete! Saved to %s\n', matFile);
-
+fprintf('Successfully generated pure chamber arrays and saved workspace to %s\n', matFile);
+%}
 %% PLOTTING
+%
+matFile = 'CEA_Thermodynamic_LUTs.mat';
+
+if ~exist(matFile, 'file')
+    error('Could not find %s.', matFile);
+end
+
+load(matFile, 'LUT_Breakpoints_OF', 'LUT_Breakpoints_P_bar', ...
+              'LUT_Matrix_Cstar_mps', 'LUT_Matrix_Gamma', ...
+              'LUT_Matrix_Ivac_mps', 'LUT_Matrix_Isp_mps');
 
 % Create grid shapes for the plotting canvas
 [X_Pressure, Y_OF] = meshgrid(LUT_Breakpoints_P_bar, LUT_Breakpoints_OF);
@@ -146,3 +173,5 @@ grid on; view(-45, 30); colorbar;
 
 sgtitle('NASA CEA Thermodynamic Surface Profiles (Fixed Axis Alignment)', ...
         'FontSize', 14, 'FontWeight', 'bold');
+
+%}
