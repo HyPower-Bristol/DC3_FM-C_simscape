@@ -23,3 +23,6 @@ Ally_properties                   % Load aluminium alloy properties
 Thermofluids_Parameters_GS        % Load GS Simscape Block Parameters
 Thermofluids_Parameters_LV        % Load LV Simscape Block Parameters
 
+
+stopTime = 10000;
+

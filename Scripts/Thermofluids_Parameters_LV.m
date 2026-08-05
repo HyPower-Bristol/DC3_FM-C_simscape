@@ -19,7 +19,7 @@
 % Nitrogen tank mass = 1.93 kg (ref 11.Appendices A.2 propulsion overview of DC3-PDR)
 % Nitrogen burst disc threshold 350 bar (ref 4.3 feed system)
 % Still needed length - not provided - making assumption for now**
-N2_TANK_pressure = 30000000;           % tank pressure, Pa (done)
+N2_TANK_pressure = 300000;           % tank pressure, Pa (done)
 N2_BURST_DISC_pressure = 35000000;     % burst disc pressure, Pa (done) [*remember in simscape value/100000]
 N2_TANK_mass = 1.93;                   % tank mass, kg
 N2_TANK_cs_area = 0.029559;            % <-may not apply % tank cross sectional area, m^2 -> from diameter of 194mm
@@ -48,6 +48,8 @@ Ox_TANK_inlet_cs_area = NaN;        % Inlet cross-sectional area, m^2
 OX_TANK_length = 0.525;             % Tank length, m
 OX_TANK_inlet_h = NaN;              % Inlet height, m
 OX_TANK_volume = 0.0155186;         % Tank volume, m^3 <-derived value (done)
+OX_TANK_Initial_Mass_frac = 0; 
+dipstick_gauge_start = 0.15;        % Dipstick height inside Ox tank
 OX_INJECTOR_orifice_area = 80*1e-6; %injector orifice area (m^2) -> from EReg_Tank_Drain_N2O_Init.m
 OX_INJECTOR_discharge_coefficient = 0.7; %injector orifice discharge coefficient -> from EReg_Tank_Drain_N2O_Init.m
 
@@ -59,7 +61,7 @@ OX_INJECTOR_discharge_coefficient = 0.7; %injector orifice discharge coefficient
 % Fuel tank length = 175mm (A.3 length breakdown DC3-PDR)
 % Fuel tank pressure 50 bar (ref 4.7.4 performance analysis DC3-PDR)
 % Fuel burst disc threshold 65 bar (ref 4.3 feed system)
-FUEL_TANK_pressure = 5000000;        % Tank pressure, Pa
+FUEL_TANK_pressure = 300000;        % Tank pressure, Pa
 FUEL_BURST_DISC_pressure = 6500000;  % Burst disc pressure, Pa
 FUEL_TANK_mass = 5;                  % Tank mass, kg
 FUEL_volume = 5.28;                  % Fuel volume, l 
@@ -68,5 +70,11 @@ FUEL_TANK_inlet_cs_area = NaN;       % Inlet cross-sectional area, m^2
 FUEL_TANK_length = 0.175;            % Tank length, m
 FUEL_TANK_inlet_h = NaN;             % Inlet height, m
 FUEL_TANK_volume = 0.00517287;       % Tank volume, m^3 <-derived value
+FUEL_TANK_Initial_Mass_kg = 1.375; 
 FUEL_INJECTOR_orifice_area = 60*1e-6; %injector orifice area (m^2) -> from EReg_Tank_Drain_Init.m
 FUEL_INJECTOR_discharge_coefficient = 0.7; %injector orifice discharge coefficient -> from EReg_Tank_Drain_Init.m
+
+%% Engine (Feed) Initial conditions
+Engine_Initial_Fuel_Pressure_bar = 3;
+Engine_Initial_Ox_Pressure_bar = 3;
+
