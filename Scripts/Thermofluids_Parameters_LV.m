@@ -48,6 +48,8 @@ Ox_TANK_inlet_cs_area = NaN;        % Inlet cross-sectional area, m^2
 OX_TANK_length = 0.525;             % Tank length, m
 OX_TANK_inlet_h = NaN;              % Inlet height, m
 OX_TANK_volume = 0.0155186;         % Tank volume, m^3 <-derived value (done)
+OX_INJECTOR_orifice_area = 80*1e-6; %injector orifice area (m^2) -> from EReg_Tank_Drain_N2O_Init.m
+OX_INJECTOR_discharge_coefficient = 0.7; %injector orifice discharge coefficient -> from EReg_Tank_Drain_N2O_Init.m
 
 
 %% Fuel (IPA) Tank Parameters
@@ -66,3 +68,5 @@ FUEL_TANK_inlet_cs_area = NaN;       % Inlet cross-sectional area, m^2
 FUEL_TANK_length = 0.175;            % Tank length, m
 FUEL_TANK_inlet_h = NaN;             % Inlet height, m
 FUEL_TANK_volume = 0.00517287;       % Tank volume, m^3 <-derived value
+FUEL_INJECTOR_orifice_area = 60*1e-6; %injector orifice area (m^2) -> from EReg_Tank_Drain_Init.m
+FUEL_INJECTOR_discharge_coefficient = 0.7; %injector orifice discharge coefficient -> from EReg_Tank_Drain_Init.m
