@@ -13,4 +13,4 @@ load("CEA_Thermodynamic_LUTs.mat");
 
 %% AMBIENT CONDITIONS
 GroundAtmosphericPressure_Pa = 101325;    % ISA Sea Level Pressure, Pascals
-GroundAmbientTemp_K = 288.15;             % ISA Sea Level Temp, Kelvin
+GroundAtmosphericTemp_K = 288.15;             % ISA Sea Level Temp, Kelvin
