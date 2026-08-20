@@ -3,6 +3,6 @@
 %   
 %   This file should hold aluminium alloy properties
 
-Ally_conductivity_Wpmk = 200;
-Ally_density_kgpm3 = 2750;
-Ally_heatCapacity_Jpkgk = 400;
+Ally_conductivity_Wpmk = 236;              % Engineering ToolBox, @ 0 degC
+Ally_density_kgpm3 = 2699;                 % Wikipedia
+Ally_heatCapacity_Jpkgk = 896.9;           % Wikipedia

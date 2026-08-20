@@ -108,3 +108,7 @@ Kv_max = 13;
 Cv_max = Kv_max / 0.865;  % converting from the metric to US imperial?
 
 
+
+%% THERMAL PARAMETERS
+
+
