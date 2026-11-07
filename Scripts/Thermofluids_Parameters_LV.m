@@ -43,11 +43,11 @@ OX_BURST_DISC_pressure = 6500000;   % Burst disc pressure, Pa (done) [*remember 
 OX_TANK_SAFETY_pressure = 5800000;  % **double check if modelling this -conditional pressure, Pa
 OX_TANK_mass = 6;                   % Tank mass, kg
 OX_volume = 14.4;                   % Oxidiser volume, l
-Ox_TANK_cs_area = 0.029559;         % Tank cross sectional area, m^2 -> from diameter of 194mm (done)
+Ox_TANK_cs_area = pi*(0.192/2)^2;   % m^2, 192 mm internal bore
 Ox_TANK_inlet_cs_area = NaN;        % Inlet cross-sectional area, m^2
-OX_TANK_length = 0.525;             % Tank length, m
+OX_TANK_length = 0.710106;             % Tank length, m
 OX_TANK_inlet_h = NaN;              % Inlet height, m
-OX_TANK_volume = 0.0155186;         % Tank volume, m^3 <-derived value (done)
+OX_TANK_volume = 0.020559630;         % m^3, nominal cavity to port faces
 OX_TANK_Initial_Mass_frac = 0; 
 dipstick_gauge_start = 0.15;        % Dipstick height inside Ox tank
 
@@ -62,11 +62,11 @@ FUEL_TANK_pressure = 300000;        % Tank pressure, Pa
 FUEL_BURST_DISC_pressure = 6500000;  % Burst disc pressure, Pa
 FUEL_TANK_mass = 5;                  % Tank mass, kg
 FUEL_volume = 5.28;                  % Fuel volume, l 
-FUEL_TANK_cs_area =0.029559;         % Tank cross sectional area, m^2 -> from diameter of 194mm
+FUEL_TANK_cs_area =pi*(0.192/2)^2;   % m^2, 192 mm internal bore
 FUEL_TANK_inlet_cs_area = NaN;       % Inlet cross-sectional area, m^2
-FUEL_TANK_length = 0.175;            % Tank length, m
+FUEL_TANK_length = 0.291059;         % Tank length, m
 FUEL_TANK_inlet_h = NaN;             % Inlet height, m
-FUEL_TANK_volume = 0.00517287;       % Tank volume, m^3 <-derived value
+FUEL_TANK_volume = 0.008427004;      % m^3, nominal cavity to port faces
 FUEL_TANK_Initial_Mass_kg = 1.375; 
 
 
